@@ -124,27 +124,26 @@ def pdf_bytes(r):
         story.append(Paragraph(escape(str(text)), styles[style]))
         story.append(Spacer(1, 10))
     para("The Kindness Within", "Title")
-    para("Your personal reflection report", "Heading2")
-    para("Educational reflection only. Not a diagnosis or validated assessment.")
-    para("Your inner voice: " + r["pattern"], "Heading2")
-    para("Friend response style: " + r["friend_style"] + ". Self response style: " + r["self_style"] + ".")
-    para("Reported triggers", "Heading2")
-    para(", ".join(r["triggers"]) if r["triggers"] else "No triggers selected.")
-    para("Your reflection ratings", "Heading2")
+    para("Your results", "Heading2")
+    para("A class reflection activity, not a scientific score or diagnosis.")
+    para("Most common theme: " + r["pattern"])
+    para("Talking to a friend: " + r["friend_style"])
+    para("Talking to yourself: " + r["self_style"])
+    para("Same or different: " + r["comparison"])
+    para("Your 1 to 5 answers", "Heading2")
     for label, val in r["ratings"].items():
         if val is not None:
-            para(f"{label}: {val} out of 5")
-    para("What the research says", "Heading2")
-    para("Kristin Neff (2003) describes self-kindness, common humanity and mindfulness as components of self-compassion. These responses are reflections, not validated scale scores.")
-    para("Your next step", "Heading2")
+            para(f"{label}: {val}/5")
+    para("These are the answers you chose, not an overall kindness score. For the first four items, higher means more difficulty. For emotional awareness, higher means more awareness.")
+    para("Things that get to you", "Heading2")
+    para(", ".join(r["triggers"]) if r["triggers"] else "None selected")
+    para("One thing to try", "Heading2")
     name, exercise = EXERCISES[r["focus"]]
     para(name + ": " + exercise)
-    para("Resources to Improve Your Self-Talk", "Heading2")
-    para("Learn about self-compassion and explore practical exercises from Kristin Neff.")
-    story.append(Paragraph('<link href="https://self-compassion.org/" color="blue">Visit Self-Compassion.org</link>', styles["BodyText"]))
-    story.append(Spacer(1, 10))
+    para("Why I made this", "Heading2")
+    para("Alison Wood Brooks's Talk is about communication between people. I connected that idea to self-talk. Kristin Neff's work on self-compassion helped shape the reflection questions. This is my own class activity, not a validated test.")
     para("Sources", "Heading2")
-    para("Alison Wood Brooks, Talk: The Science of Conversation and the Art of Being Ourselves (2025). Communication framing; the extension to inner dialogue is this project's interpretation.")
+    para("Brooks, A. W. (2025). Talk: The Science of Conversation and the Art of Being Ourselves.")
     para("Neff, K. D. (2003). Self-compassion: An alternative conceptualization of a healthy attitude toward oneself. Self and Identity, 2(2), 85-101. https://doi.org/10.1080/15298860309032")
     doc.build(story)
     return buffer.getvalue()
@@ -152,8 +151,8 @@ def pdf_bytes(r):
 
 st.title("The Kindness Within")
 st.subheader("How do you communicate with yourself?")
-st.write("We spend so much time thinking about how we communicate with others. What about the way we speak to ourselves?")
-st.info("This is a voluntary educational reflection, not a psychological evaluation. You can skip questions and stop at any time. Your personal responses are not saved.")
+st.write("After reading *Talk* by Alison Wood Brooks, I started thinking about how we talk to ourselves, too. This is a quick way to reflect on that.")
+st.info("This is a class project about self-talk, not a professional psychological test. There are no right or wrong answers.")
 
 if "started" not in st.session_state:
     st.session_state.started = False
@@ -201,37 +200,30 @@ else:
     if st.session_state.report:
         r = st.session_state.report
         st.divider()
-        st.header("Your Inner Voice Report")
-        st.caption("A reflection on your answers, not a diagnosis or personality type.")
-        st.subheader("1. Your prominent pattern")
-        st.write("**" + r["pattern"] + "**")
-        st.write("This is a descriptive theme based on your selected answers. Different situations can bring out different responses.")
-        st.subheader("2. How you treat yourself versus others")
-        st.write(f"**Toward a friend:** {r['friend_style']}  |  **Toward yourself:** {r['self_style']}")
-        st.write(r["comparison"])
-        st.subheader("3. Your self-criticism triggers")
-        st.write(", ".join(r["triggers"]) if r["triggers"] else "You did not select any triggers.")
-        st.subheader("4. Strengths and growth areas")
+        st.header("Your Kindness Within Results")
+        st.caption("These are your answers, not a diagnosis or a scientifically tested kindness score.")
+        st.subheader("Your numbers")
+        st.write("Each number is what you selected on a 1 to 5 scale. I didn't turn them into a made-up overall percentage.")
         ratings = {k: v for k, v in r["ratings"].items() if v is not None}
         if ratings:
-            st.bar_chart(ratings, horizontal=True)
-            st.caption("Raw answers on a 1–5 scale. Higher numbers are not always better; the final item reflects emotional awareness rather than distress.")
+            for label, value in ratings.items():
+                st.metric(label, f"{value}/5")
+            st.caption("For self-blame, harsh self-talk, productivity guilt, and comparison distress, a higher number means more difficulty. For nonjudgmental awareness, a higher number means more awareness.")
         else:
-            st.write("Answer the rating questions to see your reflection chart.")
-        st.subheader("5. Psychology behind your responses")
-        st.write("Kristin Neff's 2003 framework describes self-kindness, common humanity, and mindfulness as parts of self-compassion. Our questions invite reflection on those themes, but are not a validated measure.")
-        st.write("Alison Wood Brooks's *Talk* explores communication between people. This project applies the idea of intentional communication to the way we address ourselves; that extension is our own interpretation.")
-        st.subheader("6. Your self-kindness action plan")
+            st.write("You skipped the number questions, so there aren't any ratings to show.")
+        st.subheader("What stood out")
+        st.write(f"**Your most common theme:** {r['pattern']}")
+        st.write(f"**How you'd respond to a friend:** {r['friend_style']}")
+        st.write(f"**How you'd respond to yourself:** {r['self_style']}")
+        st.write(f"**Comparison:** {r['comparison']}")
+        st.write("**Things that make self-kindness harder:** " + (", ".join(r["triggers"]) if r["triggers"] else "None selected"))
+        st.subheader("One thing you could try")
         name, exercise = EXERCISES[r["focus"]]
-        st.write("**" + name + "**")
+        st.write(f"**{name}**")
         st.write(exercise)
-        st.subheader("7. Resources to Improve Your Self-Talk")
-        st.write(
-            "Want to learn more about treating yourself with kindness? "
-            "Explore research-based information and practical self-compassion exercises."
-        )
-        st.link_button("Explore Self-Compassion Resources", "https://self-compassion.org/")
-        st.download_button("Download My PDF Report", pdf_bytes(r), "the_kindness_within_report.pdf", mime="application/pdf")
+        st.subheader("How this connects to the book")
+        st.write("In *Talk*, Alison Wood Brooks explains how much communication matters in our relationships. I wanted to take that idea one step further and think about how we talk to ourselves. Kristin Neff's research on self-compassion also helped me come up with these reflection questions. This is my interpretation for a class project, not a psychological test.")
+        st.download_button("Download My Results (PDF)", pdf_bytes(r), "the_kindness_within_report.pdf", mime="application/pdf")
         st.divider()
         st.subheader("Contribute anonymous class statistics? (Optional)")
         st.write("If you agree, the app will add only category counts to the class dashboard. It will not store your name, written reflection, or individual response record. You still receive your report if you decline.")
@@ -278,5 +270,6 @@ with st.sidebar:
                     st.error("Could not read aggregate statistics.")
             elif pwd:
                 st.error("Incorrect password")
+
 
 
